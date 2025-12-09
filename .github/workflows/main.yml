@@ -36,7 +36,7 @@ jobs:
           port: 22
           forceUpload: true
           localDir: "${{ env.RANDOM_ID }}/"
-          remoteDir: "/tmp/"
+          remoteDir: "/srv/www/works/"
 
       - name: リモートサーバに配置処理をする
         uses: appleboy/ssh-action@v1.2.0
@@ -49,4 +49,4 @@ jobs:
             cd /srv/www/html;
             mkdir -p ${{ env.REPO_NAME }}/htdocs;
             cd ${{ env.REPO_NAME }}/htdocs;
-            tar zxf /tmp/${{ env.REPO_NAME }}-${{ env.RANDOM_ID }}.tar.gz
+            tar zxf /srv/www/works/${{ env.REPO_NAME }}-${{ env.RANDOM_ID }}.tar.gz
