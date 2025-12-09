@@ -22,10 +22,10 @@ jobs:
 
       - name: ソースコードを圧縮
         run: |
-            mkdir ./${{ env.RANDOM_ID }};
             cd ${{ vars.DEPLOY_DIR }} ;
-            tar -zcf ../${{ env.RANDOM_ID }}/${{ env.REPO_NAME }}-${{ env.RANDOM_ID }}.tar.gz .;
-            ls -la ../${{ env.RANDOM_ID }}/${{ env.REPO_NAME }}-${{ env.RANDOM_ID }}.tar.gz
+            mkdir /tmp/${{ env.RANDOM_ID }};
+            tar -zcf /tmp/${{ env.RANDOM_ID }}/${{ env.REPO_NAME }}-${{ env.RANDOM_ID }}.tar.gz .;
+            ls -la /tmp/${{ env.RANDOM_ID }}/${{ env.REPO_NAME }}-${{ env.RANDOM_ID }}.tar.gz
 
       - name: SFTP プロトコルでファイル転送
         uses: wangyucode/sftp-upload-action@v2.0.4
@@ -35,7 +35,7 @@ jobs:
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           forceUpload: true
-          localDir: "${{ env.RANDOM_ID }}/"
+          localDir: "/tmp/${{ env.RANDOM_ID }}/"
           remoteDir: "/srv/www/works/"
 
       - name: リモートサーバに配置処理をする
