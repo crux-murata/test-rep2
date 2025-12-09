@@ -1,0 +1,59 @@
+name: Deploy to WebServer
+
+on:
+  push:
+    branches:
+      - ${{ vars.BRANCH_DEFAULT }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: random ID を生成
+        run: |
+            echo "RANDOM_ID=$(uuidgen)" >> $GITHUB_ENV;
+            echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV;
+            echo "SRC_PATH=/tmp/${{ github.event.repository.name }}.tar.gz" >> $GITHUB_ENV;
+
+      - name: Branch to preview
+        if: ${{ vars.BRANCH_DEFAULT == vars.DEPLOY_BRANCH }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ vars.DEPLOY_BRANCH }}
+
+      - name: Checkout source
+        if: "!(${{ vars.BRANCH_DEFAULT == vars.DEPLOY_BRANCH }})"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compress build directory
+        run: |
+            cd ${{ vars.DEPLOY_DIR }} ;
+            tar -zcf /tmp/${{ env.REPO_NAME }}.tar.gz .;
+            ls -la /tmp/${{ env.REPO_NAME }}.tar.gz
+
+      - name: Upload via SCP
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER_scp }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          debug: true
+          source: "/tmp/${{ env.REPO_NAME }}.tar.gz"
+          target: "/tmp/${{ env.RANDOM_ID }}/"
+
+      - name: Extract on remote
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            hostname;
+            cd /srv/www/html;
+            mkdir -p ${{ env.REPO_NAME }}/htdocs;
+            cd ${{ env.REPO_NAME }}/htdocs;
+            tar zxf /tmp/${{ env.RANDOM_ID }}/tmp/${{ env.REPO_NAME }}.tar.gz
