@@ -2,7 +2,7 @@ name: Deploy to WebServer
 
 on:
   push:
-    branches: master
+    branches: ${{ vars.BRANCH_DEFAULT }}
 
 jobs:
   deploy:
