@@ -2,7 +2,7 @@ name: Deploy to WebServer
 
 on:
   push:
-    branches: ${{ vars.BRANCH_DEFAULT }}
+    branches: master
 
 jobs:
   deploy:
@@ -16,13 +16,13 @@ jobs:
             echo "SRC_PATH=/tmp/${{ github.event.repository.name }}.tar.gz" >> $GITHUB_ENV;
 
       - name: Branch to preview
-        if: ${{ vars.BRANCH_DEFAULT == vars.DEPLOY_BRANCH }}
+        if: "!(${{ vars.BRANCH_DEFAULT}} == ${{ vars.DEPLOY_BRANCH }})"
         uses: actions/checkout@v4
         with:
           ref: ${{ vars.DEPLOY_BRANCH }}
 
       - name: Checkout source
-        if: "!(${{ vars.BRANCH_DEFAULT == vars.DEPLOY_BRANCH }})"
+        if: "(${{ vars.BRANCH_DEFAULT}} == ${{ vars.DEPLOY_BRANCH }})"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
